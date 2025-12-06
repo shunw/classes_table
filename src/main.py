@@ -53,22 +53,6 @@ class Subject:
     else:
       return 'something wrong'
     
-  def deal_time_slot_4df(self):
-    '''
-    this is to make the time into the block, like (11:25,11:40) -> 11:30; (11:05, 10:50)-> 11:00; 
-    
-    :param self: Description
-    '''
-    st = 'start_time'
-    stn = 'start_time_r'
-    self.df[stn] = None
-    
-    for i in self.df.index:
-      self.df.loc[i, stn] = self._refine_new_time(self.df.loc[i, st])
-    self.df[stn] = pd.to_datetime(self.df[stn], format = '%H:%M').dt.time
-    self.min_p = min(list(self.df[stn].unique()))
-    self.max_p = max(list(self.df[stn].unique()))
-    return self.df
 
   def deal_time_slot(self):
     '''
