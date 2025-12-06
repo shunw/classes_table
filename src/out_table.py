@@ -95,13 +95,18 @@ def table_printout(table_data):
 
 if __name__ == '__main__':
     # df = pd.read_csv('tests/base_files/out_table_2.csv')
-    a = Subject()
-    a.inf_list_create()
+    s = Subject()
 
-    a.deal_time_slot()
-    df = a.convert_inflist_to_df()
-    data = df.to_dict('records')
+
+    s.inf_list_create()
+
+    s.deal_time_slot()
     
-    s = table_printout(df)
+    inf_ls = s.sort_inflist_for_table()
+    df = s.convert_inflist_to_df(inf_ls)
+
+    data = df.to_dict('records')
+
+    f = table_printout(df)
     # with open('temp_output.txt', 'w') as f:
     #     f.writelines(a)

@@ -42,7 +42,7 @@ class Subject:
     return self.inf_ls
     
   
-  def _refine_new_time(self,time_str):
+  def _refine_new_time(self,time_str:str):
     h, m = time_str.split(':')
     if int(m) - 30 > 15: 
       return f'{int(h)+1}:00'
@@ -76,9 +76,20 @@ class Subject:
       elif self.max_p < i.start_time_r:
         self.max_p = i.start_time_r
 
-  def convert_inflist_to_df(self):
+  def sort_inflist_for_table(self):
+    '''
+    purpose is to sort the information for the further usage. 
+
+    '''
+    # k_list = ['start_time_r', 'day']
+    self.inf_ls_new = []
+    
+    self.inf_ls_new = sorted(self.inf_ls, key = lambda x: (x.start_time_r, x.day))
+    return self.inf_ls_new
+
+  def convert_inflist_to_df(self, target_inflist:list[SingleSub]):
     data = []
-    for i in self.inf_ls:
+    for i in target_inflist:
       data.append(i.dict_form())
     df = pd.DataFrame(data)
     return df
@@ -106,7 +117,10 @@ if __name__ == '__main__':
   s.inf_list_create()
 
   s.deal_time_slot()
-  s.convert_inflist_to_df()
+  
+  inf_ls = s.sort_inflist_for_table()
+  df = s.convert_inflist_to_df(inf_ls)
+  print (df)
   
   
   
