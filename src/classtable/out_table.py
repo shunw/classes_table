@@ -1,7 +1,7 @@
 import time
 import pandas as pd
 import numpy as np
-from .main import Subject
+from classtable.data_deal import Subject, SingleSub
 
 def printGroup(group, keyHeader, keyMaxLen):
     whole = ''
@@ -66,7 +66,7 @@ class RefineTableData:
         self.keyMaxLen = get_max_width(table_data)
         self.table_data = table_data.copy()
     
-    def table_data_restru(self):
+    def table_data_restru_termform(self):
         # 占位项
         tag = {}
         for i,h in enumerate(self.keyHeader):
@@ -77,6 +77,24 @@ class RefineTableData:
         t = {i:i for i in self.keyHeader}
         self.table_data.insert(0,t)
         self.table_data.insert(0,tag)
+
+class RefineTable2csv:
+    '''
+    this is for the SingleSub in main.py only. 
+    main purpose is to make a table for the gym class view by time in vertical and day in horizontal
+    '''
+    def __init__(self, inf_ls:list[SingleSub]):
+        self.inf_ls = inf_ls
+
+    def get_original_df(self):
+        ls_data = []
+        for i in self.inf_ls:
+            ls_data.append(i.dict_form())
+        needed_head = ['start_time_r', 'day', 'class_name', 'class_loc']
+        self.df = pd.DataFrame(ls_data)[needed_head]
+        print (self.df)
+        return self.df
+
     
     
 def table_printout(table_data):
@@ -86,15 +104,21 @@ def table_printout(table_data):
     :param table_data: the data you want to printout as a table, and the format of the data is the df.to_dict('records')
     '''
     rd = RefineTableData(table_data)
-    rd.table_data_restru()
+    rd.table_data_restru_termform()
 
     # 打印后面的数据项，包括两条 --+--占位
     result = printGroup(rd.table_data, rd.keyHeader, rd.keyMaxLen)
     return result
-    
 
-if __name__ == '__main__':
-    # df = pd.read_csv('tests/base_files/out_table_2.csv')
+def table_csvout(inf_ls:list[SingleSub]):
+    '''
+    Docstring for table_csvout
+    '''
+    c = RefineTable2csv(inf_ls)
+    c.get_original_df() 
+
+
+def run():
     s = Subject()
 
 
@@ -103,10 +127,15 @@ if __name__ == '__main__':
     s.deal_time_slot()
     
     inf_ls = s.sort_inflist_for_table()
-    df = s.convert_inflist_to_df(inf_ls)
+    # df = s.convert_inflist_to_df(inf_ls)
 
-    data = df.to_dict('records')
+    # data = df.to_dict('records')
 
-    f = table_printout(df)
+    f = table_csvout(inf_ls)
+    
+    
     # with open('temp_output.txt', 'w') as f:
-    #     f.writelines(a)
+    #     f.writelines(a)    
+
+if __name__ == '__main__':
+    run()
