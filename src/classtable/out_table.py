@@ -77,7 +77,7 @@ class RefineTableData:
         t = {i:i for i in self.keyHeader}
         self.table_data.insert(0,t)
         self.table_data.insert(0,tag)
-
+import numbers
 class RefineTable2csv:
     '''
     this is for the SingleSub in main.py only. 
@@ -87,17 +87,76 @@ class RefineTable2csv:
         self.inf_ls = inf_ls
 
     def get_original_df(self):
+        '''
+        Docstring convert the day_x to column
+        :param self: Description
+        '''
         ls_data = []
         for i in self.inf_ls:
             ls_data.append(i.dict_form())
-        needed_head = ['start_time_r', 'day', 'class_name', 'class_loc']
-        self.df = pd.DataFrame(ls_data)[needed_head]
-        print (self.df)
-        return self.df
-
+        
+        needed_head = ['start_time_r', 'day', 'class_inf']
+        self.df = pd.DataFrame(ls_data)
+        self.df['class_inf'] = self.df['class_name'] + '-' + self.df['class_loc']
+        self.df = self.df[needed_head]
+        
+        # pivot the column as day
+        self.df_table = self.df.pivot(columns= 'day', values = ['start_time_r','class_inf']) 
+        
+        # get the start time into the col named as start_time_combined
+        for ind in self.df_table.index: 
+            self.df_table.loc[ind, 'start_time_c'] = [i for i in self.df_table.loc[ind, 'start_time_r']if str(i) != 'nan' ][0]
+        
+        # refine the df structure: combine 5 column for the start time. and remove no use columns
+        self.df_table.reset_index(inplace = True, drop=True)
+        new_col = []
+        for i in self.df_table.columns:
+            if isinstance(i[1], numbers.Number): 
+                if i[0] == 'class_inf':
+                    new_col.append(f'day_{i[1]}')
+                else: 
+                    new_col.append(f'{i[0]}_{i[1]}')
+            else:
+                new_col.append(i[0])
+        # print (new_col)
+        self.df_table.columns = new_col
+        new_head = ['start_time_c'] + [i for i in new_col if 'start_time' not in i]
+        
+        self.df_table = self.df_table[new_head]
+        
+        return self.df_table
+    def opt_view(self):
+        '''
+        Docstring for opt_view
+            remove the start time, if already exists
+            remove the NaN to ''
+        
+        :param self: Description
+        '''
+        self.df_table_new =pd.DataFrame()
+        col = list(self.df_table.columns)
+        
+        tmp_t = None
+        for ind in self.df_table.index:
+            for c in col: 
+                # this is to judge the time already exists
+                if c == 'start_time_c':
+                    if tmp_t != self.df_table.loc[ind,c]:
+                        self.df_table_new.loc[ind, c] = self.df_table.loc[ind, c]
+                        tmp_t = self.df_table.loc[ind, c]
+                    else: 
+                        self.df_table_new.loc[ind, c] = ''
+                else:
+                    if pd.isna(self.df_table.loc[ind, c]):
+                        
+                        self.df_table_new.loc[ind, c] = ''
+                    else:
+                        self.df_table_new.loc[ind, c] = self.df_table.loc[ind, c]
+        self.df_table_new.to_csv('test.csv')
+                
     
     
-def table_printout(table_data):
+def table_printout(table_data:list[dict]):
     '''
     Docstring for table_printout
     
@@ -116,7 +175,7 @@ def table_csvout(inf_ls:list[SingleSub]):
     '''
     c = RefineTable2csv(inf_ls)
     c.get_original_df() 
-
+    c.opt_view()
 
 def run():
     s = Subject()
