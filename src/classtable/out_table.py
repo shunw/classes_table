@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 from classtable.data_deal import Subject, SingleSub
@@ -125,6 +126,43 @@ class RefineTable2csv:
         self.df_table = self.df_table[new_head]
         
         return self.df_table
+    
+    def makeup_full_time(self):
+        '''
+        Docstring for makeup_full_time
+            this is to make up the full time for one day, e.g. if after 9:00, it is 10:30, then need to add the 9:30 and 10:00 onto the table
+        
+        :param self: Description
+        '''
+        
+        tc = 'start_time_c'
+        tempy, tempm, tempd = 2020, 1, 1 # this is only for the datetime calculation
+        
+        ind = 0
+        while ind < self.df_table.shape[0]:
+            if ind == 0:
+                last_time = self.df_table.loc[ind, tc]        
+                ind += 1
+                continue
+            
+            t_delta = datetime(tempy, tempm, tempd, self.df_table.loc[ind, tc].hour, self.df_table.loc[ind, tc].minute, self.df_table.loc[ind, tc].second) - datetime(tempy, tempm, tempd, last_time.hour, last_time.minute, last_time.second)
+            
+            if t_delta.total_seconds()/(30*60) <= 1:
+                last_time = self.df_table.loc[ind, tc]        
+                ind += 1
+                continue
+            
+            else:
+                qty_row = t_delta.total_seconds()/(30*60) - 1
+                idx_pos  = ind
+                new_rows = pd.DataFrame({tc:[(datetime(tempy, tempm, tempd, last_time.hour, last_time.minute, last_time.second) + timedelta(minutes = i * 30)).time() for i in range(1, int(qty_row)+1)]})
+                
+                self.df_table = pd.concat([self.df_table.iloc[:idx_pos], new_rows, self.df_table.iloc[idx_pos: ]]).reset_index(drop = True)
+                
+                ind = ind + int(qty_row) +1
+                last_time = self.df_table.loc[ind - 1, tc]        
+        return self.df_table
+        
     def opt_view(self):
         '''
         Docstring for opt_view
@@ -175,6 +213,7 @@ def table_csvout(inf_ls:list[SingleSub]):
     '''
     c = RefineTable2csv(inf_ls)
     c.get_original_df() 
+    c.makeup_full_time()
     c.opt_view()
 
 def run():
