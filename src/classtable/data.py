@@ -41,6 +41,20 @@ class ClassScheduleInfo(BaseModel):
     loc_id: int
     preferred: bool
     
+class ClassTable(BaseModel):
+    start_time: str
+    day: int
+    preferred: bool
+    class_name: str
+    category: ClassCategory
+    priority: int
+    period_limit: bool
+    comment: Optional[str] = None
+    location: str
+    home_dis: float
+    loc_close: str
+    
+    
 def load_class_infos(csv_file: str) -> list[ClassInfo]:
     with open(csv_file, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -55,22 +69,45 @@ def load_class_schedule_infos(csv_file: str) -> list[ClassScheduleInfo]:
     with open(csv_file, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         return [ClassScheduleInfo.model_validate(row) for row in reader]
-    
+
+def data_combine() -> list:
+    '''
+    Docstring for data_create
+    from three csv 
+        
+    :return: Description
+    :rtype: list
+    '''
+    class_schedule = load_class_schedule_infos('db/class_schedule.csv')
+    class_info = load_class_infos('db/class_inf.csv')
+    loc_info = load_location_infos('db/loc_inf.csv')
+    for i in class_schedule:
+        
+        cc = next(filter(lambda p: p.class_id == i.class_id, class_info), None)
+        ll = next(filter(lambda p: p.loc_id == i.loc_id, loc_info), None)
+        d = {**i.model_dump(), **cc.model_dump(), **ll.model_dump()}
+
+        cd = ClassTable.model_validate(d)
+        print (cd)
+        # break
+
 if __name__ == "__main__":
-    import argparse, os, sys
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", help="csv file to parse", required=True)
-    parser.add_argument("-t", "--type", help="data type", choices=["class", "classsub", "location"], default="class")
+    # import argparse, os, sys
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("-f", "--file", help="csv file to parse", required=True)
+    # parser.add_argument("-t", "--type", help="data type", choices=["class", "classsub", "location"], default="class")
     
-    args = parser.parse_args()
-    csv_file = args.file
-    if not os.path.exists(csv_file) or not os.path.isfile(csv_file):
-        print(f"not a file: {csv_file}")
-        sys.exit(0)
-    type = args.type
-    load_func = load_class_infos
-    if type == "classsub":
-        load_func = load_class_schedule_infos
-    elif type == "location":
-        load_func = load_location_infos
-    print("sub data: ", [item.model_dump() for item in load_func(csv_file)])
+    # args = parser.parse_args()
+    # csv_file = args.file
+    # if not os.path.exists(csv_file) or not os.path.isfile(csv_file):
+    #     print(f"not a file: {csv_file}")
+    #     sys.exit(0)
+    # type = args.type
+    # load_func = load_class_infos
+    # if type == "classsub":
+    #     load_func = load_class_schedule_infos
+    # elif type == "location":
+    #     load_func = load_location_infos
+    # print("sub data: ", [item.model_dump() for item in load_func(csv_file)])
+    
+    data_combine()

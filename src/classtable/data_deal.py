@@ -2,27 +2,27 @@ import pandas as pd
 import time
 from datetime import datetime
 
-class SingleSub:
-    def __init__(self, one_s:pd.Series):
-        self.start_time = one_s.start_time
-        self.class_name = one_s.class_name
-        self.class_loc = one_s.location
-        self.class_category = one_s.category
-        self.class_dis = one_s.home_dis
-        self.class_priority = one_s.priority
-        self.day = one_s.day
-        self.preferred = one_s.preferred
-        self.period_lim = one_s.period_limit
+# class SingleSub:
+#     def __init__(self, one_s:pd.Series):
+#         self.start_time = one_s.start_time
+#         self.class_name = one_s.class_name
+#         self.class_loc = one_s.location
+#         self.class_category = one_s.category
+#         self.class_dis = one_s.home_dis
+#         self.class_priority = one_s.priority
+#         self.day = one_s.day
+#         self.preferred = one_s.preferred
+#         self.period_lim = one_s.period_limit
 
-        self.start_time_r = None
-        self.selected = False
+#         self.start_time_r = None
+#         self.selected = False
     
-    def dict_form(self):
-        return (self.__dict__)
+#     def dict_form(self):
+#         return (self.__dict__)
 
-    def __str__(self):
-        # return f'class:{self.class_name}; day:{self.day}; start_time:{self.start_time}; loc:{self.class_loc}; category:{self.class_category}'
-        return f'{self.__dict__}'
+#     def __str__(self):
+#         # return f'class:{self.class_name}; day:{self.day}; start_time:{self.start_time}; loc:{self.class_loc}; category:{self.class_category}'
+#         return f'{self.__dict__}'
 
 
 
