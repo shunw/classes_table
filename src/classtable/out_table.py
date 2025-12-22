@@ -225,15 +225,7 @@ def run():
     s.deal_time_slot()
     
     inf_ls = s.sort_inflist_for_table()
-    # df = s.convert_inflist_to_df(inf_ls)
-
-    # data = df.to_dict('records')
-
-    f = table_csvout(inf_ls)
+    table_csvout(inf_ls)
     
-    
-    # with open('temp_output.txt', 'w') as f:
-    #     f.writelines(a)    
-
 if __name__ == '__main__':
     run()
