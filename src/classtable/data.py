@@ -35,6 +35,32 @@ class LocationInfo(BaseModel):
     # https://docs.pydantic.dev/latest/concepts/alias/
     loc_close: str = Field(description="the nearest city center", alias="close")
     
+def refine_dt(timedata:datetime):
+    '''
+    Docstring for refine_dt
+    this is to make the time data to 30 or 00
+    
+    :param timedata: Description
+    :type timedata: datetime
+    '''
+    h = timedata.hour
+    m = timedata.minute
+    
+    try:
+        if m - 30 > 15: 
+            new = timedata.replace(hour=h+1, minute= 0)
+            
+            
+        elif (m - 30 <= 15) and (m - 30 > -15):
+            new = timedata.replace(minute = 30)
+            
+        elif m - 30 <= -15:
+            new = timedata.replace(minute = 0)
+    
+        return new
+    except ValueError as e:
+        raise ValueError(f'the input {timedata} is something wrong') from e
+    
     
 class ClassScheduleInfo(BaseModel):
     start_time_str: str = Field(alias = 'start_time')
@@ -54,7 +80,9 @@ class ClassScheduleInfo(BaseModel):
             custom_format = "%H:%M"
             try: 
                 # 尝试解析字符串
-                self.start_time_dt = datetime.strptime(t_str, custom_format).time()
+                temp_dt = datetime.strptime(t_str, custom_format).time()
+                self.start_time_dt = refine_dt(temp_dt)
+                # print (self.start_time_dt.hour, self.start_time_dt.minute)
                 
             except ValueError as e:
                 
@@ -123,7 +151,9 @@ from typing import Optional
 
 def run():
     class_schedule = load_class_schedule_infos('db/class_schedule.csv')
-    print (class_schedule)
+    dict_ls = [d.model_dump() for d in class_schedule]
+    
+    print (pd.DataFrame(dict_ls))
     
 # def data_to_df(data_ls:list[ClassTable] = data_combine()) -> pd.DataFrame:
 #     dict_ls = [d.model_dump() for d in data_ls]
