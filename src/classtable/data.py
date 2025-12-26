@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
 from enum import Enum
 from typing import Optional
 import csv
+import pandas as pd
+from datetime import datetime
 
 class ClassCategory(str, Enum):
     ballet = "ballet"
@@ -35,11 +37,29 @@ class LocationInfo(BaseModel):
     
     
 class ClassScheduleInfo(BaseModel):
-    start_time: str
+    start_time_str: str = Field(alias = 'start_time')
+    start_time_dt: Optional[datetime] = None
     class_id: int
     day: int
     loc_id: int
     preferred: bool
+    
+    @model_validator(mode = 'after')
+    def parse_str_to_datatime(self):
+        # 从values数据中获取已验证的字符串字段值
+        t_str = self.start_time_str
+        if t_str:
+            # csv中的自定义格式
+            
+            custom_format = "%H:%M"
+            try: 
+                # 尝试解析字符串
+                self.start_time_dt = datetime.strptime(t_str, custom_format).time()
+                
+            except ValueError as e:
+                
+                raise ValueError(f"时间字符串 '{t_str}' 与预期格式 '%H/%M' 不匹配。") from e
+        return self
     
 class ClassTable(BaseModel):
     start_time: str
@@ -73,7 +93,7 @@ def load_class_schedule_infos(csv_file: str) -> list[ClassScheduleInfo]:
 def data_combine() -> list:
     '''
     Docstring for data_create
-    from three csv 
+    gather data from three csv / 将inf 组织到一起, 将几个table联系起来
         
     :return: Description
     :rtype: list
@@ -81,15 +101,36 @@ def data_combine() -> list:
     class_schedule = load_class_schedule_infos('db/class_schedule.csv')
     class_info = load_class_infos('db/class_inf.csv')
     loc_info = load_location_infos('db/loc_inf.csv')
+    final_schedule = list()
     for i in class_schedule:
         
         cc = next(filter(lambda p: p.class_id == i.class_id, class_info), None)
         ll = next(filter(lambda p: p.loc_id == i.loc_id, loc_info), None)
         d = {**i.model_dump(), **cc.model_dump(), **ll.model_dump()}
 
-        cd = ClassTable.model_validate(d)
-        print (cd)
+        # cd = 
+        final_schedule.append(ClassTable.model_validate(d))
         # break
+    # print (final_schedule)
+    return final_schedule
+
+
+# from pydantic import BaseModel, field_validator
+from datetime import datetime
+from typing import Optional
+
+
+
+def run():
+    class_schedule = load_class_schedule_infos('db/class_schedule.csv')
+    print (class_schedule)
+    
+# def data_to_df(data_ls:list[ClassTable] = data_combine()) -> pd.DataFrame:
+#     dict_ls = [d.model_dump() for d in data_ls]
+#     df = pd.DataFrame(dict_ls)
+#     print (df)
+    
+    
 
 if __name__ == "__main__":
     # import argparse, os, sys
@@ -109,5 +150,4 @@ if __name__ == "__main__":
     # elif type == "location":
     #     load_func = load_location_infos
     # print("sub data: ", [item.model_dump() for item in load_func(csv_file)])
-    
-    data_combine()
+    run()
