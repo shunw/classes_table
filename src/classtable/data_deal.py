@@ -7,20 +7,7 @@ from classtable.data import data_combine
 class Subject:
     def __init__(self):
         self.inf_ls = data_combine()
-        # print (len(self.inf_ls))
     
-    def _refine_new_time(self,time_str:str):
-        h, m = time_str.split(':')
-        if int(m) - 30 > 15: 
-            return f'{int(h)+1}:00'
-        elif (int(m) - 30 <= 15) and (int(m) - 30 > -15):
-            return f'{int(h)}:30'
-        elif int(m) - 30 <= -15:
-            return f'{int(h)}:00'
-        else:
-            return 'something wrong'
-        
-
     def deal_time_slot(self):
         '''
         this is for the information list, this is to make the time into the block, like (11:25,11:40) -> 11:30; (11:05, 10:50)-> 11:00; 
@@ -44,7 +31,14 @@ class Subject:
                 self.max_p = i.start_time_r
 
     def arrange_time_table(self):
-        
+        '''
+        Docstring for arrange_time_table
+            逻辑是：
+                1. preferred 
+                2. 当天安排 （跑步，或者是 散步，block 时间和 地点）
+                3. 优先级
+        :param self: Description
+        '''
         # collect the information of arranged class
         arg_dict = dict() # {group_key: [case1, case2, ... ], group_key1: [case5, case6, ...]}
         # group_key_fd = # (preferred, priority, category)
