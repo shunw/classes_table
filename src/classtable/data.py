@@ -170,9 +170,13 @@ def be_blocked(cls_time:datetime, block_time_s:datetime, block_time_e:datetime) 
     如果课程的开始时间 在block的时间中间 
     如果课程的开始时间 +1h 比 block的开始 时间晚，那就说明这个课程不能上
     '''
+    # print (cls_time, block_time_s, block_time_e)
     if (cls_time >= block_time_s) and (cls_time <= block_time_e):
         return True
-    if cls_time + timedelta(hours=1) > block_time_s:
+    '''
+    此处逻辑有问题!!!
+    '''
+    if (cls_time <= block_time_s) and cls_time + timedelta(hours=1) >= block_time_s:
         return True
     return False
     
@@ -199,9 +203,10 @@ def data_combine() -> list[ClassTable]:
         '''
         flag = False # 没有block的时间
         block_ls = list(filter(lambda p: p.day == i.day, block_schedule)) # 做成list 是因为觉得可能 一天里可能会有两个block的时间
-        
+        # print (block_ls)
         for b in block_ls:
             flag = be_blocked(i.start_time_dt, b.start_time_dt, b.end_time_dt)
+            # print (flag)
             if flag:
                 break
         if flag:

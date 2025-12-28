@@ -16,3 +16,4 @@ id,start_time,class_id,day,loc_id,preferred
 15,9:10,15,5,11,False
 16,10:05,11,5,11,False
 17,19:00,4,5,2,False
+18,20:30,10,1,2,False
