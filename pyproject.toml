@@ -13,6 +13,7 @@ dependencies = [
 [project.scripts]
 out_table = 'classtable.out_table:run'
 data_deal = 'classtable.data_deal:run'
+data_ck = 'classtable.data:run'
 
 [tool.uv]
 package = true
