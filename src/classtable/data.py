@@ -232,9 +232,15 @@ def run():
     
 def data_to_df() -> pd.DataFrame:
     data_ls = data_combine()
+    data_ls = sorted(data_ls, key = lambda x: (x.day, x.start_time_dt))
     dict_ls = [d.model_dump() for d in data_ls]
     df = pd.DataFrame(dict_ls)
     print (df)
+    
+def data_run():
+    print("Assitent: Which class?")
+    cc = input("User: ")
+    print(f"Assistant: Your class is {cc}")
     
     
 
