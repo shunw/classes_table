@@ -237,10 +237,70 @@ def data_to_df() -> pd.DataFrame:
     df = pd.DataFrame(dict_ls)
     print (df)
     
-def data_run():
-    print("Assitent: Which class?")
-    cc = input("User: ")
-    print(f"Assistant: Your class is {cc}")
+def get_last_id(csv_fl:str='db/test.csv', key_col:str='id')->int:
+    '''
+    Docstring for get_last_id
+    拿到该文件中的最后一个 id
+    :param csv_fl: csv 文件名 及其路径
+    :key_col: 对应的文件的 主id
+    :type csv_fl: str
+    :return: 这个应该是这个文件中的最后一个 id
+    :rtype: int
+    '''    
+    df = pd.read_csv(csv_fl)
+    
+    try: 
+        return max(df[key_col])
+    except KeyError as e:
+        raise KeyError(f'there is no ID column in the file of {csv_fl}') from e
+
+def show_id_n_content(csv_fl:str, key_id:str, key_name:str):
+    '''
+    Docstring for show_id_n_content
+        这个def主要是为了 罗列 csv 表格中对应的id 及其 主要内容，
+        如 如果是class inf csv 则罗列其 classid 和 class 名字
+    :param csv_fl: Description
+    :type csv_fl: str
+    '''
+    # with open (csv_fl, 'r', encoding = 'utf-8') as f:
+    #     r = csv.reader(f)
+    #     for i in r:
+    #         print (i.class_id)
+    df = pd.read_csv(csv_fl)
+    str_inf = ''
+    for i in df.index:
+        str_inf += f'{df.loc[i, key_name]} ({df.loc[i, key_id]}); '
+        # print (i.class_id, i.class_name)
+    print (str_inf)
+    
+def data_input_assist():
+    print("Assistant: Pls input your class schedule info:")
+    start_time = input("start_time (hh:mm): ")
+    day = input('day (1-7): ')
+    
+    print ('='*20)
+    print ('below is the loc inf: ')
+    show_id_n_content('db/loc_inf.csv', 'loc_id', 'location')
+    loc_id = input('pls choose the above loc with its id: ')
+    
+    print ('='*20)
+    print ('below is the class inf: ')
+    show_id_n_content('db/class_inf.csv', 'class_id', 'class_name')
+    class_id = input('pls choose the above class with its id: ')
+    
+    print ('='*20)
+    pref = input('Do you prefer this class with the schedule and the location?')
+    
+    print ('='*20)
+    print (f'your input is: \nday: {day}\nstart_time: {start_time}')
+    
+    csv_f = 'db/class_schedule.csv'
+    new_line = [get_last_id(csv_f, 'id')+1, start_time, class_id, day, loc_id, pref]
+    with open(csv_f,'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(new_line)
+    
+    
     
     
 
@@ -262,4 +322,5 @@ if __name__ == "__main__":
     # elif type == "location":
     #     load_func = load_location_infos
     # print("sub data: ", [item.model_dump() for item in load_func(csv_file)])
-    run()
+    
+    data_input_assist()
