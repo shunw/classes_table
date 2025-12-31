@@ -16,24 +16,38 @@ class ClassCategory(str, Enum):
     yoga = "yoga"
     zumba = "zumba"
     
+    @classmethod
+    def list_all(cls):
+        return list(cls._member_map_.keys())
 
 class ClassInfo(BaseModel):
     """
     class info
     """
-    class_id: int
+    class_id: Optional[int] = None
     class_name: str
-    category: ClassCategory
-    priority: int
-    period_limit: bool
+    category: Optional[ClassCategory] = None
+    priority: Optional[int] = None
+    period_limit: Optional[bool] = None
     comment: Optional[str] = None
     
+    def __eq__(self, value):
+        if isinstance(value, ClassInfo):
+            if value.class_name != self.class_name: return False
+        return False
+    
 class LocationInfo(BaseModel):
-    loc_id: int
+    loc_id: Optional[int] = None
     location: str
     home_dis: float
     # https://docs.pydantic.dev/latest/concepts/alias/
-    loc_close: str = Field(description="the nearest city center", alias="close")
+    loc_close: Optional[str|None] = Field(description="the nearest city center", alias="close")
+    
+    def __eq__(self, value):
+        if isinstance(value, LocationInfo):
+            if value.location != self.location: return False
+            return True
+        return False
     
 def refine_dt(timedata:datetime):
     '''
@@ -281,33 +295,86 @@ def show_id_n_content(csv_fl:str, key_id:str, key_name:str):
         str_inf += f'{df.loc[i, key_name]} ({df.loc[i, key_id]}); '
         # print (i.class_id, i.class_name)
     print (str_inf)
+
+def loc_inf_input_assist():
+    loc_fl = 'db/loc_inf.csv'
+    print('\nAssistant: Pls input your loc info: ')
+    loc = input(f'\n{'='*20}\nnew location (in Chinese): ')
+    home_dis = input(f'\n{'='*20}\ndistance to home (in float): ')
+    close = input(f'\n{'='*20}\nclose to which area (in Chinese): ')
+    comment = input (f'\n{'='*20}\nany other comments: ')
+    
+    cur_entry = LocationInfo(location=loc, home_dis=home_dis,close=close)
+    datas = load_location_infos(loc_fl)
+    if cur_entry in datas:
+        print ('\nexist~~~')
+    else: 
+        print ('\nnew entry')
+        new_line = [get_last_id(loc_fl, 'loc_id')+1, loc, home_dis,close,comment]
         
-def data_input_assist():
+        with open(loc_fl,'a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(new_line)
+def class_inf_input_assist():
+    clss_fl = 'db/class_inf.csv'        
+    print ('\nAssistant: Pls input your class info: ')
+    cls_name = input(f'\n{'='*20}\nclass name (str): ')
+    prior = input(f'\n{'='*20}\npriority of this class (int): ')
+    print (ClassCategory.list_all())
+    category = input(f'please fill in the class category you want.: ')
+    period = input(f'is this class limited by period? (True, False)')
+    comment = input(f'any comment?: ')    
+    
+    cur_entry = ClassInfo(class_name=cls_name)
+    datas = load_class_infos(clss_fl)
+    if cur_entry in datas:
+        print ('\nexist~~~')
+    else:
+        print ('\nnew entry')
+        new_line = [get_last_id(clss_fl, 'class_id')+1, cls_name, prior, category, period, comment]
+        
+        with open(clss_fl, 'a', newline='', encoding= 'utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(new_line)
+def data_input_assist_one():
+    
     print("\nAssistant: Pls input your class schedule info:")
     
-    print ()
-    print ('='*20)
-    start_time = input("start_time (hh:mm): ")
+    start_time = input(f"\n{'='*20}\nstart_time (hh:mm): ")
     
-    print ()
-    print ('='*20)
-    day = input('day (1-7): ')
+    day = input(f'\n{'='*20}\nday (1-7): ')
     
-    print ()
-    print ('='*20)
-    print ('below is the loc inf: ')
-    show_id_n_content('db/loc_inf.csv', 'loc_id', 'location')
-    loc_id = input('pls choose the above loc with its id: ')
+    # below is to add the location information
+    while True:
+        max_id = get_last_id('db/loc_inf.csv', 'loc_id')
+        print (f'\n{'='*20}\nbelow is the latest loc inf: ')
+        show_id_n_content('db/loc_inf.csv', 'loc_id', 'location')
+        loc_flag = input (f'Is the loc listed above you want to choose or do you want to add new? (choose_id({1}-{max_id})/ add_new(A)): ')
     
-    print ()
-    print ('='*20)
-    print ('below is the class inf: ')
-    show_id_n_content('db/class_inf.csv', 'class_id', 'class_name')
-    class_id = input('pls choose the above class with its id: ')
+        if loc_flag.isdigit(): 
+            loc_id = loc_flag
+            break
+        elif loc_flag.lower() == 'a': 
+            loc_inf_input_assist()
+            
+        else:
+            print ('\nthe information entered is unexpected. Please choose again.')
+        
+    while True:
+        max_cid = get_last_id('db/class_inf.csv', 'class_id')
+        print (f'\n{'='*20}\nbelow is the class inf: ')
+        show_id_n_content('db/class_inf.csv', 'class_id', 'class_name')
+        cls_flag = input (f'Is the class listed above you want to choose or do you want to add new? (choose_id({1}-{max_cid})/ add new (A))')
+        
+        if cls_flag.isdigit():
+            class_id = cls_flag
+            break
+        elif cls_flag.lower() == 'a':
+            class_inf_input_assist()
+        else:
+            print ('\nthe information entered is unexpected. Please choose again.')
     
-    print ()
-    print ('='*20)
-    pref = input('Do you prefer this class with the schedule and the location?(True or False) ')
+    pref = input(f'\n{'='*20}\nDo you prefer this class with the schedule and the location?(True or False) ')
     
     cur_entry = ClassScheduleInfo(start_time= start_time, class_id=class_id, day = day, loc_id = loc_id, preferred= pref)
     
@@ -326,7 +393,12 @@ def data_input_assist():
             writer.writerow(new_line)
     
     
-    
+def data_input_assist_loop():
+    while True: 
+        data_input_assist_one()
+        flag = input('If you want to exist the entry, press Q.\nif you press any other keys, we will continue the entry: ')
+        if flag.lower() == 'q':
+            break
     
 
 if __name__ == "__main__":
@@ -348,4 +420,6 @@ if __name__ == "__main__":
     #     load_func = load_location_infos
     # print("sub data: ", [item.model_dump() for item in load_func(csv_file)])
     
-    data_input_assist()
+    # loc_inf_input_assist()
+    data_input_assist_loop()
+    

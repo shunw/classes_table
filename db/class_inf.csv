@@ -14,3 +14,4 @@ class_id,class_name,priority,category,period_limit,comment
 13,body_balance,2,yoga,False
 14,lelepop,2,dance,False,
 15,舞蹈形体,1,dance,False,
+16,某个新课,1,ballet,False,

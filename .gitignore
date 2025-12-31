@@ -1,5 +1,7 @@
 .DS_Store
 .python-version
+db/db_bkp/*.*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

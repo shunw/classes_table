@@ -32,9 +32,10 @@
 - feat：input 信息可以 进入到对应的 csv [done]
 - feat：terminal show 对应的信息和 id [done]
 - feat：确认是否会有duplicate，如果有duplicate 应该如何操作？（所有录入 csv文件的 terminal的 输入都需要确认是否有 duplicate）[done]
-- feat：如果没有对应的 课程id 应该如何操作，process
-- feat: 如果想 中途终止，或者取消应该 如何操作？
+- feat：如果没有对应的 课程id 应该如何操作，process [done]
 - feat：如果想删除对应的条目，应该如何操作？
+- feat: 如果想 中途终止，或者取消应该 如何操作？/ 增设一直 输入的 process，除非有 按特殊按键，然后终止，需要在界面上有对应的提示 [done]
+- bug：为啥有时 writer row会写到上面一行的csv里去
 
 # 需要加的内容
 [x] 课程显示 需要加 排序，比如按照日期 时间排序 --- 在data_deal 里有 --- 也加到了data 里
