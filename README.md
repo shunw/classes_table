@@ -1,14 +1,15 @@
 # classes_table
 
 # 选课逻辑
-- prefer 为true的 (prefer, category) 为key 索引各条 class schedule 1
-- prefer 为false的 (priority, category) 为key 索引各条 class schedule 2
-- 先以 day sort {class schedule 1 dict} 然后 以day / priority sort {class schedule 2 dict}
-- 遍历两个dict，然后加两个dict 判断，day dict 和 category dict 以限制 day 和 category
-- 每轮 确认 
+- [x] prefer 为true的 (prefer, category) 为key 索引各条 class schedule 1
+- [x] prefer 为false的 (priority, category) 为key 索引各条 class schedule 2
+- [x] 先以 day sort {class schedule 1 dict} 然后 以day / priority sort {class schedule 2 dict}
+- [x] 遍历两个dict，然后加两个dict 判断，day dict 和 category dict 以限制 day 和 category
+- [x] 每轮 确认 
     - 那天的 课有没有超过 2节，如果超过，后面的class skip
     - 累计的 category的，有没有超过 1节，如果超过，后面的 clss skip
-
+- [] 如果 block 是以散步为主，则，选中午或者下午的 市中心的课为优先，市中心先考虑 以list方式安排
+    - [] 遍历 市中心的位置，然后看是否有 对应的时间的课程
 
 # 问答式逻辑 --- 为了输入课程信息
 目的是为了要把输入的信息放入到对应的csv文件中去，主要输入的 csv文件为 class_schedule
