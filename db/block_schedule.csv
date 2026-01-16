@@ -1,5 +1,5 @@
-start_time,end_time,loc,event,day
-16:30,21:00,打浦桥,jogging,1
-17:00,20:00,陕西南路,walking,4
-12:00,14:00,tbd,tennis,6
-12:00,17:00,陕西南路,walking,7
+start_time,end_time,loc,event,day,block_downtown_area
+16:30,21:00,打浦桥,jogging,1,
+17:00,20:00,陕西南路,walking,4,
+12:00,14:00,tbd,tennis,6,
+12:00,17:00,陕西南路,walking,7,

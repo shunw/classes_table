@@ -39,9 +39,17 @@ class ClassInfo(BaseModel):
 class LocationInfo(BaseModel):
     loc_id: Optional[int] = None
     location: str
-    home_dis: float
+    home_dis: Optional[float] = None
+    is_downtown: Optional[bool] = False
     # https://docs.pydantic.dev/latest/concepts/alias/
-    loc_close: Optional[str|None] = Field(description="the nearest city center", alias="close")
+    loc_close: Optional[str] = Field(description="the nearest city center", alias="close")
+
+    @field_validator("home_dis", "is_downtown", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "":
+            return None
+        return v
     
     def __eq__(self, value):
         if isinstance(value, LocationInfo):
@@ -127,8 +135,8 @@ class ClassTable(BaseModel):
     period_limit: bool
     comment: Optional[str] = None
     location: str
-    home_dis: float
-    loc_close: str
+    home_dis: Optional[float] = None
+    loc_close: Optional[str] = None
 
 class BlockTable(BaseModel):
     '''
@@ -200,9 +208,7 @@ def be_blocked(cls_time:datetime, block_time_s:datetime, block_time_e:datetime) 
     # print (cls_time, block_time_s, block_time_e)
     if (cls_time >= block_time_s) and (cls_time <= block_time_e):
         return True
-    '''
-    此处逻辑有问题!!!
-    '''
+    
     if (cls_time <= block_time_s) and cls_time + timedelta(hours=1) >= block_time_s:
         return True
     return False
@@ -299,10 +305,10 @@ def show_id_n_content(csv_fl:str, key_id:str, key_name:str):
 def loc_inf_input_assist():
     loc_fl = 'db/loc_inf.csv'
     print('\nAssistant: Pls input your loc info: ')
-    loc = input(f'\n{'='*20}\nnew location (in Chinese): ')
-    home_dis = input(f'\n{'='*20}\ndistance to home (in float): ')
-    close = input(f'\n{'='*20}\nclose to which area (in Chinese): ')
-    comment = input (f'\n{'='*20}\nany other comments: ')
+    loc = input(f'\n{"="*20}\nnew location (in Chinese): ')
+    home_dis = input(f'\n{"="*20}\ndistance to home (in float): ')
+    close = input(f'\n{"="*20}\nclose to which area (in Chinese): ')
+    comment = input (f'\n{"="*20}\nany other comments: ')
     
     cur_entry = LocationInfo(location=loc, home_dis=home_dis,close=close)
     datas = load_location_infos(loc_fl)
@@ -318,8 +324,8 @@ def loc_inf_input_assist():
 def class_inf_input_assist():
     clss_fl = 'db/class_inf.csv'        
     print ('\nAssistant: Pls input your class info: ')
-    cls_name = input(f'\n{'='*20}\nclass name (str): ')
-    prior = input(f'\n{'='*20}\npriority of this class (int): ')
+    cls_name = input(f'\n{"="*20}\nclass name (str): ')
+    prior = input(f'\n{"="*20}\npriority of this class (int): ')
     print (ClassCategory.list_all())
     category = input(f'please fill in the class category you want.: ')
     period = input(f'is this class limited by period? (True, False)')
@@ -340,14 +346,14 @@ def data_input_assist_one():
     
     print("\nAssistant: Pls input your class schedule info:")
     
-    start_time = input(f"\n{'='*20}\nstart_time (hh:mm): ")
+    start_time = input(f'\n{"="*20}\nstart_time (hh:mm): ')
     
-    day = input(f'\n{'='*20}\nday (1-7): ')
+    day = input(f'\n{"="*20}\nday (1-7): ')
     
     # below is to add the location information
     while True:
         max_id = get_last_id('db/loc_inf.csv', 'loc_id')
-        print (f'\n{'='*20}\nbelow is the latest loc inf: ')
+        print (f'\n{"="*20}\nbelow is the latest loc inf: ')
         show_id_n_content('db/loc_inf.csv', 'loc_id', 'location')
         loc_flag = input (f'Is the loc listed above you want to choose or do you want to add new? (choose_id({1}-{max_id})/ add_new(A)): ')
     
@@ -362,7 +368,7 @@ def data_input_assist_one():
         
     while True:
         max_cid = get_last_id('db/class_inf.csv', 'class_id')
-        print (f'\n{'='*20}\nbelow is the class inf: ')
+        print (f'\n{"="*20}\nbelow is the class inf: ')
         show_id_n_content('db/class_inf.csv', 'class_id', 'class_name')
         cls_flag = input (f'Is the class listed above you want to choose or do you want to add new? (choose_id({1}-{max_cid})/ add new (A))')
         
@@ -374,16 +380,16 @@ def data_input_assist_one():
         else:
             print ('\nthe information entered is unexpected. Please choose again.')
     
-    pref = input(f'\n{'='*20}\nDo you prefer this class with the schedule and the location?(True or False) ')
+    pref = input(f'\n{"="*20}\nDo you prefer this class with the schedule and the location?(True or False) ')
     
     cur_entry = ClassScheduleInfo(start_time= start_time, class_id=class_id, day = day, loc_id = loc_id, preferred= pref)
     
     datas = load_class_schedule_infos('db/class_schedule.csv')
     if cur_entry in datas:
-        print (f'\n{'='*20}\nThis entry is already exist, please try next~\n')
+        print (f'\n{"="*20}\nThis entry is already exist, please try next~\n')
     
     else:
-        print (f'\n{'='*20}\nthe new entry is: \n{'='*20}\n{cur_entry}')
+        print (f'\n{"="*20}\nthe new entry is: \n{"="*20}\n{cur_entry}')
     
         csv_f = 'db/class_schedule.csv'
         new_line = [get_last_id(csv_f, 'id')+1, start_time, class_id, day, loc_id, pref]
